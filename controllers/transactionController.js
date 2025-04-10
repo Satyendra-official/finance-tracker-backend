@@ -1,8 +1,9 @@
-const Transaction = require('../models/Transaction');
-const Account = require('../models/Account');
+// controllers/transactionController.js
+import Transaction from '../models/Transaction.js';
+import Account from '../models/Account.js';
 
 // Create a transaction (income or expense)
-exports.createTransaction = async (req, res) => {
+export const createTransaction = async (req, res) => {
   try {
     let { accountId, type, amount, category } = req.body;
 
@@ -54,7 +55,7 @@ exports.createTransaction = async (req, res) => {
 };
 
 // Get all transactions
-exports.getTransactions = async (req, res) => {
+export const getTransactions = async (req, res) => {
   try {
     const transactions = await Transaction.find().populate('accountId');
     res.status(200).json(transactions);
@@ -64,7 +65,7 @@ exports.getTransactions = async (req, res) => {
 };
 
 // Get a transaction by ID
-exports.getTransactionById = async (req, res) => {
+export const getTransactionById = async (req, res) => {
   try {
     const transaction = await Transaction.findById(req.params.id).populate('accountId');
     if (!transaction) return res.status(404).json({ message: 'Transaction not found' });
@@ -75,7 +76,7 @@ exports.getTransactionById = async (req, res) => {
 };
 
 // Delete a transaction and update account balance
-exports.deleteTransaction = async (req, res) => {
+export const deleteTransaction = async (req, res) => {
   try {
     const transaction = await Transaction.findById(req.params.id);
     if (!transaction) return res.status(404).json({ message: 'Transaction not found' });

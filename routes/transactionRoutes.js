@@ -1,12 +1,13 @@
 // routes/transactionRoutes.js
-const express = require('express');
-const router = express.Router();
-const {
+import express from 'express';
+import {
   createTransaction,
   getTransactions,
   getTransactionById,
   deleteTransaction,
-} = require('../controllers/transactionController');
+} from '../controllers/transactionController.js';
+
+const router = express.Router();
 
 // POST /api/transactions - create transaction
 // Accepts accountId OR category (if accountId not provided)
@@ -21,4 +22,4 @@ router.get('/:id', getTransactionById);
 // DELETE /api/transactions/:id - delete a transaction and adjust balance
 router.delete('/:id', deleteTransaction);
 
-module.exports = router;
+export default router;

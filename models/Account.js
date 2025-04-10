@@ -1,13 +1,14 @@
-const mongoose = require('mongoose');
+// models/Account.js
+import mongoose from 'mongoose';
 
 const accountSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "67f63e5f3ec9e5346ac6e5d3", // 'User'
+    ref: 'User', // Reference to 'User' model, not the ObjectId itself
     required: false,
   },
   name: {
-    type: String, // salary account, Expence account, 
+    type: String, // salary account, expense account, etc.
     required: true,
   },
   type: {
@@ -30,5 +31,4 @@ const accountSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-module.exports = mongoose.model('Account', accountSchema);
-
+export default mongoose.model('Account', accountSchema);

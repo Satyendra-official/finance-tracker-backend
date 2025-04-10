@@ -1,13 +1,14 @@
 // routes/accountRoutes.js
-const express = require('express');
+import express from 'express';
+import { 
+  createAccount, 
+  getAccounts, 
+  getAccountById, 
+  updateAccount, 
+  deleteAccount 
+} from '../controllers/accountController.js';
+
 const router = express.Router();
-const {
-  createAccount,
-  getAccounts,
-  getAccountById,
-  updateAccount,
-  deleteAccount,
-} = require('../controllers/accountController');
 
 router.post('/', createAccount);
 router.get('/', getAccounts);
@@ -15,4 +16,4 @@ router.get('/:id', getAccountById);
 router.put('/:id', updateAccount);
 // router.delete('/:id', deleteAccount);
 
-module.exports = router;
+export default router;

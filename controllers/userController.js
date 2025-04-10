@@ -1,9 +1,9 @@
 // controllers/userController.js
-const User = require('../models/User');
-const bcrypt = require('bcryptjs');
+import User from '../models/User.js';
+import bcrypt from 'bcryptjs';
 
 // Register a new user
-exports.registerUser = async (req, res) => {
+export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
@@ -34,7 +34,7 @@ exports.registerUser = async (req, res) => {
 };
 
 // Login user
-exports.loginUser = async (req, res) => {
+export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -56,7 +56,7 @@ exports.loginUser = async (req, res) => {
 };
 
 // Get all users (for testing/admin)
-exports.getAllUsers = async (req, res) => {
+export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find().select('-password');
     res.status(200).json(users);
@@ -65,11 +65,11 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
-
-exports.deleteUser = async (req, res) => {
+// Delete user
+export const deleteUser = async (req, res) => {
   try {
-    await Account.findByIdAndDelete(req.params.id);
-    res.status(200).json({ message: 'Account deleted' });
+    await User.findByIdAndDelete(req.params.id); // Fixed typo: Account -> User
+    res.status(200).json({ message: 'User deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
