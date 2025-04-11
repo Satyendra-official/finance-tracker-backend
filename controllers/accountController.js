@@ -4,7 +4,7 @@ import Account from '../models/Account.js';
 // Create a new account
 export const createAccount = async (req, res) => {
   try {
-    const { name, category, type, balance, setAsDefault, userId } = req.body;
+    const { name, type, balance, setAsDefault, userId } = req.body;
 
     if (setAsDefault) {
       // Unset existing default account for the same user
@@ -14,7 +14,7 @@ export const createAccount = async (req, res) => {
       );
     }
 
-    const account = new Account({ name, category, type, balance, setAsDefault, userId });
+    const account = new Account({ name, type, balance, setAsDefault, userId });
     const savedAccount = await account.save();
 
     res.status(201).json(savedAccount);
@@ -48,37 +48,66 @@ export const getAccountById = async (req, res) => {
 export const updateAccount = async (req, res) => {
   try {
     const { id } = req.params;
-    const { setAsDefault, userId, ...rest } = req.body;
+    const { setAsDefault, ...rest } = req.body;
 
-    // If the updated account should be the default one
-    if (setAsDefault) {
-      // Unset previous default account for this user
-      await Account.updateMany(
-        { userId, setAsDefault: true, _id: { $ne: id } },
-        { $set: { setAsDefault: false } }
-      );
-    }
-
-    const updatedAccount = await Account.findByIdAndUpdate(
-      id,
-      {
-        $set: {
-          ...rest,
-          ...(setAsDefault !== undefined && { setAsDefault }), // only update if it's provided
-        },
-      },
-      { new: true }
-    );
-
-    if (!updatedAccount) {
+    // 1. Check if the account exists
+    const account = await Account.findById(id);
+    if (!account) {
       return res.status(404).json({ message: 'Account not found' });
     }
 
-    res.status(200).json(updatedAccount);
+    const userId = account.userId;
+    let updatedAccount = account;
+
+    // 2. If setAsDefault is true, unset others and set this one as default in a single DB call
+    if (setAsDefault === true) {
+      await Account.bulkWrite([
+        {
+          updateMany: {
+            filter: { userId, _id: { $ne: id } },
+            update: { $set: { setAsDefault: false } }
+          }
+        },
+        {
+          updateOne: {
+            filter: { _id: id, userId },
+            update: { $set: { setAsDefault: true } }
+          }
+        }
+      ]);
+      updatedAccount.setAsDefault = true
+    }
+
+   
+    const hasOtherFields = Object.keys(rest).length > 0;
+
+    if (hasOtherFields || (setAsDefault !== undefined && setAsDefault !== true)) {
+      const updatePayload = { ...rest };
+
+      // Only set setAsDefault in this update if it's not already handled by bulkWrite
+      if (setAsDefault !== undefined && setAsDefault !== true) {
+        updatePayload.setAsDefault = setAsDefault;
+      }
+
+      updatedAccount = await Account.findByIdAndUpdate(
+        id,
+        { $set: updatePayload },
+        { new: true }
+      );
+    }
+
+    return res.status(200).json({
+      message: "Account updated successfully",
+      updatedAccount
+    });
+
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Update account error:", err);
+    return res.status(500).json({ error: err.message });
   }
 };
+
+
 
 // Delete an account
 export const deleteAccount = async (req, res) => {

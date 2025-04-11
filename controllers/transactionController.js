@@ -5,24 +5,24 @@ import Account from '../models/Account.js';
 // Create a transaction (income or expense)
 export const createTransaction = async (req, res) => {
   try {
-    let { accountId, type, amount, category } = req.body;
+    let { accountId, type, amount, name } = req.body;
 
     // Step 1: Resolve accountId
     if (!accountId) {
-      if (category) {
-        // Try to find default account for the given category
+      if (name) {
+        // Try to find default account for the given name
         const defaultAccount = await Account.findOne({
-          category: category,
+          name: name,
           setAsDefault: true,
         });
 
         if (!defaultAccount) {
-          return res.status(400).json({ message: `No default account found for category: ${category}` });
+          return res.status(400).json({ message: `No default account found for name: ${name}` });
         }
 
         accountId = defaultAccount._id;
       } else {
-        // No category provided, fallback to any default account
+        // No name provided, fallback to any default account
         const fallbackAccount = await Account.findOne({ setAsDefault: true });
 
         if (!fallbackAccount) {
