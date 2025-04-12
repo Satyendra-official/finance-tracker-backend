@@ -5,7 +5,8 @@ import Account from '../models/Account.js';
 export const createAccount = async (req, res) => {
   try {
     const { name, type, balance, setAsDefault, userId } = req.body;
-
+    
+    console.log(userId)
     if (setAsDefault) {
       // Unset existing default account for the same user
       await Account.updateMany(
@@ -19,7 +20,12 @@ export const createAccount = async (req, res) => {
 
     res.status(201).json(savedAccount);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    // Handle duplicate key error for 'name'
+    if (err.code === 11000 && err.keyPattern?.name) {
+      return res.status(400).json({ message: 'Account name already exists' });
+    }
+
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -27,6 +33,7 @@ export const createAccount = async (req, res) => {
 export const getAccounts = async (req, res) => {
   try {
     const accounts = await Account.find();
+    // console.log(accounts)
     res.status(200).json(accounts);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -36,7 +43,8 @@ export const getAccounts = async (req, res) => {
 // Get a single account
 export const getAccountById = async (req, res) => {
   try {
-    const account = await Account.findById(req.params.id);
+    const {id:_id} = req.params
+    const account = await Account.findById(id);
     if (!account) return res.status(404).json({ message: 'Account not found' });
     res.status(200).json(account);
   } catch (err) {
@@ -52,6 +60,7 @@ export const updateAccount = async (req, res) => {
 
     // 1. Check if the account exists
     const account = await Account.findById(id);
+    
     if (!account) {
       return res.status(404).json({ message: 'Account not found' });
     }
@@ -97,6 +106,7 @@ export const updateAccount = async (req, res) => {
     }
 
     return res.status(200).json({
+      success : true,
       message: "Account updated successfully",
       updatedAccount
     });

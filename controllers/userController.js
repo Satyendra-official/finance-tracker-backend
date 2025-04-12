@@ -1,6 +1,7 @@
 // controllers/userController.js
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 // Register a new user
 export const registerUser = async (req, res) => {
@@ -46,10 +47,23 @@ export const loginUser = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: user._id, email: user.email }, // payload
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '1d' }
+    );
+
     // Hide password in response
     const { password: _, ...userWithoutPassword } = user.toObject();
 
-    res.status(200).json(userWithoutPassword);
+    res.status(200).json({
+      message: 'Login successful',
+      user: userWithoutPassword,
+      token,
+    });
+
+    
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -15,6 +15,7 @@ const accountSchema = new mongoose.Schema(
       type: String,
       // enum: ['personal', 'work'],
       required: true,
+      unique: true,
 
       // type: String,  salary account, expense account, etc.
       // required: true,
