@@ -5,6 +5,7 @@ import {
   getTransactions,
   getTransactionById,
   deleteTransaction,
+  getRecurringTransactions,
 } from '../controllers/transactionController.js';
 
 const router = express.Router();
@@ -18,6 +19,10 @@ router.get('/', getTransactions);
 
 // GET /api/transactions/:id - fetch a single transaction
 router.get('/:id', getTransactionById);
+
+//GET /api/transactions/recurring?interval=daily - to fetch recurring transactions
+router.get('/recurring', getRecurringTransactions);
+
 
 // DELETE /api/transactions/:id - delete a transaction and adjust balance
 router.delete('/:id', deleteTransaction);

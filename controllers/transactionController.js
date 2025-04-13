@@ -94,3 +94,24 @@ export const deleteTransaction = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+
+// Get recurring transactions based on interval
+export const getRecurringTransactions = async (req, res) => {
+  try {
+    const { interval } = req.query;
+
+    if (!interval) {
+      return res.status(400).json({ message: 'Repeat interval is required (e.g., daily, weekly, monthly)' });
+    }
+
+    const recurringTransactions = await Transaction.find({
+      isRecurring: true,
+      repeatInterval: interval.toLowerCase(),
+    }).populate('accountId');
+
+    res.status(200).json(recurringTransactions);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
